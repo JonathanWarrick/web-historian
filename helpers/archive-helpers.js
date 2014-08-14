@@ -2,6 +2,8 @@ var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
 var helpers = require('../web/http-helpers.js')
+var httpRequest = require('http-request');
+var htmlFetcher = require('../workers/htmlfetcher.js');
 
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
@@ -30,24 +32,18 @@ exports.readListOfUrls = function(callback){
   fs.readFile(exports.paths['list'], function(err, file) {
     var stringfile = file.toString().trim();
     var listarray = stringfile.split(',');
-    return callback(listarray);
+    callback(listarray);
   });
 
 };
 
-exports.isUrlInList = function(sitename, callback, response){
-  fs.readFile(exports.paths['list'], function(err, file) {
-
-    var stringfile = file.toString().trim();
-    var listarray = stringfile.split(',');
-
-    if(listarray.indexOf(sitename) !== -1) {
-      helpers.sendResponse(response);
-    } else {
-      callback(sitename, response);
-    }
-
-  });
+exports.isUrlInList = function(sitename, listarray, callback){
+  exports.downloadUrls();
+  if(listarray.indexOf(sitename) !== -1) {
+    callback(true);
+  } else {
+    callback(false);
+  }
 };
 
 exports.addUrlToList = function(sitename, response){
@@ -55,23 +51,39 @@ exports.addUrlToList = function(sitename, response){
     if(err) {
       throw err;
     }
-    helpers.sendResponse(response, ','+sitename , 302);
+    helpers.sendResponse(response, ','+sitename, 302);
   });
 };
 
-exports.isURLArchived = function(request, response){
-  var userUrl = request.url.slice(1);
+exports.isURLArchived = function(request, response, data){
+  var userUrl = data || request.url.slice(4);
+  console.log('request.url ', request.url.slice(4));
+  console.log('userURL is: ', userUrl);
+  console.log('data is ', data);
   fs.exists(exports.paths['archivedSites'] + '/' + userUrl, function(exists) {
     if(exists) {
       // return page
-      helpers.sendResponse(response, request.url.slice(1));
+      fs.readFile(exports.paths['archivedSites'] + '/' + userUrl, function(err, html) {
+        console.log('html is: ', html);
+        response.writeHead(200, helpers.headers);
+        response.end(html);
+      });
     } else {
       helpers.sendResponse(response, request.url.slice(1), 404);
     }
-});
-
+  });
 };
 
 exports.downloadUrls = function(){
   // if isURLArchived is false, run this function
+  exports.readListOfUrls(function passListArray(listarray){
+    listarray.forEach(function(value, index) {
+      var url = value;
+      fs.exists(exports.paths['archivedSites'] + '/' + url, function(exists) {
+        if(!exists) {
+          htmlFetcher.testScrape(url);
+        }
+      });
+    });
+  });
 };

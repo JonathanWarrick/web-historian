@@ -32,17 +32,26 @@ exports.handleRequest = function (req, res) {
 
   if(req.method === 'POST') {
     var chunk = '';
+    // read-in and parse data
     req.on("data", function(data) {
       chunk += data;
     });
+    // once data is read-in, begin callback hell
     req.on('end', function() {
-      console.log('inside end');
-      archive.isUrlInList(chunk, archive.addUrlToList, res);
+      var userUrl = chunk.slice(4);
+      console.log('chunck from POSt is ', userUrl);
+      archive.readListOfUrls(function passListArray(listarray){
+        archive.isUrlInList(userUrl, listarray, function inListHandler(isInList){
+          if(isInList){
+            // return the archived stuff
+            archive.isURLArchived(req, res, userUrl);
+          } else {
+            // add to the list?
+            archive.addUrlToList(userUrl, res);
+          }
+        });
+      });
     });
-
-    // req.on('end', function() {
-    //   archive.readListOfUrls(chunk, res,)
-    // })
   }
    // fs.readFile('./public/loading.html', function(err, html) {
    //  res.writeHead(200, helpers.headers);
