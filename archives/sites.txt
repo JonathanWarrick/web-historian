@@ -1,1 +1,6 @@
+<<<<<<< HEAD
 www.google.com,www.yahoo.com
+=======
+www.google.com,www.yahoo.com,www.cnn.com,www.ign.com,www.nytimes.com,www.hackreactor.com, www.people.com, www.whitehouse.gov, www.gawker.com, www.caranddriver.com, www.tmz.com, www.people.com, www.dlisted.com, www.engadget.com, www.reddit.com
+,reddit.com
+>>>>>>> f9f4fddbe3cf4684786dfa2167e933ca363089e8

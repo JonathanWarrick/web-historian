@@ -23,8 +23,14 @@ exports.collectUrl = function(request, callback) {
 exports.serveAssets = function(res, asset, callback) {
   // Write some code here that helps serve up your static files!
   // (Static files are things like html (yours or archived from others...), css, or anything that doesn't change often.)
+  callback(asset, function(err, html) {
+    res.writeHead(200, headers);
+    res.end(html);
+  });
 };
 
-
-
-// As you progress, keep thinking about what helper functions you can put here!
+exports.sendResponse = function(response, data, statusCode) {
+  statusCode = statusCode || 200;
+  response.writeHead(statusCode, exports.headers);
+  response.end(data);
+};

@@ -31,7 +31,9 @@ describe("Node Server Request Listener Function", function() {
     waitForThen(
       function() { return res._ended; },
       function(){
+        console.log('responseCode ', res._responseCode);
         expect(res._responseCode).to.equal(200);
+        console.log('response: ', res);
         expect(res._data.toString().match(/<input/)).to.be.ok; // the resulting html should have an input tag
         done();
     });
@@ -65,7 +67,7 @@ describe("Node Server Request Listener Function", function() {
       function(){
         var fileContents = fs.readFileSync(archive.paths.list, 'utf8');
         expect(res._responseCode).to.equal(302);
-        expect(fileContents).to.equal(url + "\n");
+        expect(fileContents).to.equal(','+url);
         done();
     });
   });
@@ -91,7 +93,7 @@ describe("html fetcher helpers", function(){
     var urlArray = ["example1.com", "example2.com"];
     var resultArray;
 
-    fs.writeFileSync(archive.paths.list, urlArray.join("\n"));
+    fs.writeFileSync(archive.paths.list, urlArray.join(","));
     archive.readListOfUrls(function(urls){
       resultArray = urls;
     });
